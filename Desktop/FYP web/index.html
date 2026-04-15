@@ -1,26 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-  // 2. ඔයාගේ Firebase Config එක
-  const firebaseConfig = {
-    apiKey: "AIzaSyD1XFEtzr9HSAsVmoBVbRa-Q9lbVwLc-0A",
-    authDomain: "fyphub-21c86.firebaseapp.com",
-    databaseURL: "https://fyphub-21c86-default-rtdb.firebaseio.com",
-    projectId: "fyphub-21c86",
-    storageBucket: "fyphub-21c86.firebasestorage.app",
-    messagingSenderId: "1037945519100",
-    appId: "1:1037945519100:web:559d8fa9ec15db00ed9079",
-    measurementId: "G-VH4KB1VWCD"
-  };
-
-  // 3. Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database(); // script.js එකට මේක අනිවාර්යයෙන්ම ඕනේ
-</script>
+  <!-- Firebase scripts removed — now using JSONBin -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FYP Hub — Collaboration Space</title>
@@ -98,55 +79,37 @@
         <div class="brand-sub">Group Workspace</div>
       </div>
     </div>
-
     <nav class="sidebar-nav">
       <div class="nav-label">Workspace</div>
       <button class="nav-btn active" data-section="dashboard" onclick="showSection('dashboard',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-        </span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg></span>
         Dashboard
       </button>
       <button class="nav-btn" data-section="tasks" onclick="showSection('tasks',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        </span>
-        Tasks
-        <span class="nav-badge" id="taskBadge"></span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+        Tasks <span class="nav-badge" id="taskBadge"></span>
       </button>
       <button class="nav-btn" data-section="timeline" onclick="showSection('timeline',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.5V8l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        </span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.5V8l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
         Timeline
       </button>
       <button class="nav-btn" data-section="research" onclick="showSection('research',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        </span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
         Research
       </button>
       <button class="nav-btn" data-section="meetings" onclick="showSection('meetings',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 3.5V2M11 3.5V2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.5 7h13" stroke="currentColor" stroke-width="1.4"/></svg>
-        </span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 3.5V2M11 3.5V2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M1.5 7h13" stroke="currentColor" stroke-width="1.4"/></svg></span>
         Meetings
       </button>
       <button class="nav-btn" data-section="chat" onclick="showSection('chat',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12v9H9l-3 3v-3H2V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        </span>
-        Chat
-        <span class="nav-badge" id="chatBadge"></span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12v9H9l-3 3v-3H2V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+        Chat <span class="nav-badge" id="chatBadge"></span>
       </button>
       <button class="nav-btn" data-section="files" onclick="showSection('files',this)">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h4l2 2h4.5A1.5 1.5 0 0115.5 5.5v7A1.5 1.5 0 0114 14H3.5A1.5 1.5 0 012 12.5v-9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        </span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h4l2 2h4.5A1.5 1.5 0 0115.5 5.5v7A1.5 1.5 0 0114 14H3.5A1.5 1.5 0 012 12.5v-9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
         Files
       </button>
     </nav>
-
     <div class="sidebar-members">
       <div class="nav-label">Members <span id="onlineCount"></span></div>
       <div class="member-list" id="memberList"></div>
@@ -155,7 +118,6 @@
         Add Member
       </button>
     </div>
-
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebarAvatar"></div>
       <div class="user-info">
@@ -195,6 +157,17 @@
     <!-- DASHBOARD -->
     <section id="sec-dashboard" class="section active">
       <div class="hero-banner">
+        <div class="workspace-quickbar" onclick="openWorkspaceBar()">
+  <div class="workspace-quickbar-left">
+    <div class="workspace-quickbar-icon">↗</div>
+    <div>
+      <div class="workspace-quickbar-title">Open Workspace</div>
+      <div class="workspace-quickbar-sub">Go to your team workspace and continue working</div>
+    </div>
+  </div>
+  <button class="workspace-quickbar-btn" type="button">Open</button>
+</div>
+
         <div class="hero-inner">
           <div class="hero-eyebrow">Final Year Project</div>
           <div class="hero-title" id="heroTitle" onclick="editProject()">Click to set project title...</div>
@@ -205,44 +178,26 @@
           </div>
         </div>
         <div class="hero-progress-wrap">
-          <div class="hero-progress-label">
-            <span>Overall Progress</span>
-            <span id="overallPct">0%</span>
-          </div>
-          <div class="hero-progress-track">
-            <div class="hero-progress-fill" id="overallBar" style="width:0%"></div>
-          </div>
+          <div class="hero-progress-label"><span>Overall Progress</span><span id="overallPct">0%</span></div>
+          <div class="hero-progress-track"><div class="hero-progress-fill" id="overallBar" style="width:0%"></div></div>
           <div class="hero-progress-stats" id="progressStats"></div>
         </div>
       </div>
-
       <div class="dash-grid">
         <div class="dash-card">
-          <div class="dash-card-head">
-            <div class="dash-card-title">Recent Tasks</div>
-            <button class="dash-card-link" onclick="showSection('tasks', document.querySelector('[data-section=tasks]'))">View all</button>
-          </div>
+          <div class="dash-card-head"><div class="dash-card-title">Recent Tasks</div><button class="dash-card-link" onclick="showSection('tasks',document.querySelector('[data-section=tasks]'))">View all</button></div>
           <div id="recentTasksList" class="recent-list"></div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-head">
-            <div class="dash-card-title">Upcoming Milestones</div>
-            <button class="dash-card-link" onclick="showSection('timeline', document.querySelector('[data-section=timeline]'))">View all</button>
-          </div>
+          <div class="dash-card-head"><div class="dash-card-title">Upcoming Milestones</div><button class="dash-card-link" onclick="showSection('timeline',document.querySelector('[data-section=timeline]'))">View all</button></div>
           <div id="recentMilestones" class="recent-list"></div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-head">
-            <div class="dash-card-title">Research Papers</div>
-            <button class="dash-card-link" onclick="showSection('research', document.querySelector('[data-section=research]'))">View all</button>
-          </div>
+          <div class="dash-card-head"><div class="dash-card-title">Research Papers</div><button class="dash-card-link" onclick="showSection('research',document.querySelector('[data-section=research]'))">View all</button></div>
           <div id="recentPapers" class="recent-list"></div>
         </div>
         <div class="dash-card">
-          <div class="dash-card-head">
-            <div class="dash-card-title">Meeting Notes</div>
-            <button class="dash-card-link" onclick="showSection('meetings', document.querySelector('[data-section=meetings]'))">View all</button>
-          </div>
+          <div class="dash-card-head"><div class="dash-card-title">Meeting Notes</div><button class="dash-card-link" onclick="showSection('meetings',document.querySelector('[data-section=meetings]'))">View all</button></div>
           <div id="recentMeetings" class="recent-list"></div>
         </div>
       </div>
@@ -257,9 +212,7 @@
           <button class="filter-tab" onclick="filterTasks('inprogress',this)">In Progress</button>
           <button class="filter-tab" onclick="filterTasks('done',this)">Done</button>
         </div>
-        <select class="filter-select" id="assigneeFilter" onchange="filterTasksByAssignee()">
-          <option value="">All Members</option>
-        </select>
+        <select class="filter-select" id="assigneeFilter" onchange="filterTasksByAssignee()"><option value="">All Members</option></select>
       </div>
       <div class="kanban-board" id="kanbanBoard"></div>
     </section>
@@ -301,10 +254,11 @@
     <section id="sec-files" class="section">
       <div class="files-drop-zone" id="filesDropZone" ondragover="event.preventDefault()" ondrop="handleFileDrop(event)" onclick="document.getElementById('filePickerInput').click()">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 8v16M13 15l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 28h28v4H6v-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        <div class="drop-label">Drop files here or click to upload</div>
-        <div class="drop-sub">Files are stored as references (name, size, date)</div>
+        <div class="drop-label">Drop files here or click to add</div>
+        <div class="drop-sub">File info is saved. Add a URL link via edit to share the actual file.</div>
         <input type="file" id="filePickerInput" multiple style="display:none" onchange="handleFileSelect(event)">
       </div>
+      <div id="uploadProgressBar" style="display:none;padding:10px 0;color:var(--accent);font-size:13px;text-align:center;"></div>
       <div class="files-grid" id="filesGrid"></div>
     </section>
   </main>
@@ -318,7 +272,7 @@
   <div class="modal-head"><div class="modal-title">Project Details</div><button class="modal-close" onclick="closeAllModals()">✕</button></div>
   <div class="modal-body">
     <div class="field-wrap"><label class="field-label">Project Title</label><input class="field-input" id="modalProjectTitle" placeholder="e.g. Smart Irrigation System Using IoT"></div>
-    <div class="field-wrap"><label class="field-label">Description</label><textarea class="field-input field-textarea" id="modalProjectDesc" placeholder="Brief overview of the project..."></textarea></div>
+    <div class="field-wrap"><label class="field-label">Description</label><textarea class="field-input field-textarea" id="modalProjectDesc" placeholder="Brief overview..."></textarea></div>
     <div class="field-wrap"><label class="field-label">Supervisor</label><input class="field-input" id="modalSupervisor" placeholder="Dr. / Prof. name"></div>
     <div class="field-wrap"><label class="field-label">Batch / Year</label><input class="field-input" id="modalBatch" placeholder="e.g. 2024/25"></div>
     <div class="field-wrap"><label class="field-label">Final Deadline</label><input class="field-input" id="modalDeadline" type="date"></div>
@@ -334,27 +288,15 @@
     <div class="field-wrap"><label class="field-label">Description</label><textarea class="field-input field-textarea" id="taskDesc" placeholder="Optional details..."></textarea></div>
     <div class="modal-row">
       <div class="field-wrap" style="flex:1"><label class="field-label">Status</label>
-        <select class="field-input" id="taskStatus">
-          <option value="todo">To Do</option>
-          <option value="inprogress">In Progress</option>
-          <option value="done">Done</option>
-        </select>
+        <select class="field-input" id="taskStatus"><option value="todo">To Do</option><option value="inprogress">In Progress</option><option value="done">Done</option></select>
       </div>
       <div class="field-wrap" style="flex:1"><label class="field-label">Priority</label>
-        <select class="field-input" id="taskPriority">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+        <select class="field-input" id="taskPriority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
       </div>
     </div>
     <div class="modal-row">
-      <div class="field-wrap" style="flex:1"><label class="field-label">Assigned To</label>
-        <select class="field-input" id="taskAssignee"></select>
-      </div>
-      <div class="field-wrap" style="flex:1"><label class="field-label">Due Date</label>
-        <input class="field-input" id="taskDue" type="date">
-      </div>
+      <div class="field-wrap" style="flex:1"><label class="field-label">Assigned To</label><select class="field-input" id="taskAssignee"></select></div>
+      <div class="field-wrap" style="flex:1"><label class="field-label">Due Date</label><input class="field-input" id="taskDue" type="date"></div>
     </div>
   </div>
   <div class="modal-foot">
@@ -373,13 +315,8 @@
       <div class="field-wrap" style="flex:1"><label class="field-label">End Date</label><input class="field-input" id="msEnd" type="date"></div>
     </div>
     <div class="field-wrap"><label class="field-label">Notes</label><textarea class="field-input field-textarea" id="msNotes" placeholder="Optional..."></textarea></div>
-    <div class="field-wrap">
-      <label class="field-label">Status</label>
-      <select class="field-input" id="msStatus">
-        <option value="upcoming">Upcoming</option>
-        <option value="active">Active</option>
-        <option value="done">Done</option>
-      </select>
+    <div class="field-wrap"><label class="field-label">Status</label>
+      <select class="field-input" id="msStatus"><option value="upcoming">Upcoming</option><option value="active">Active</option><option value="done">Done</option></select>
     </div>
   </div>
   <div class="modal-foot">
@@ -400,13 +337,8 @@
     </div>
     <div class="field-wrap"><label class="field-label">URL / DOI</label><input class="field-input" id="paperUrl" placeholder="https://..."></div>
     <div class="field-wrap"><label class="field-label">Notes / Summary</label><textarea class="field-input field-textarea" id="paperNotes" placeholder="Key takeaways..."></textarea></div>
-    <div class="field-wrap">
-      <label class="field-label">Status</label>
-      <select class="field-input" id="paperStatus">
-        <option value="unread">Unread</option>
-        <option value="reading">Reading</option>
-        <option value="read">Read</option>
-      </select>
+    <div class="field-wrap"><label class="field-label">Status</label>
+      <select class="field-input" id="paperStatus"><option value="unread">Unread</option><option value="reading">Reading</option><option value="read">Read</option></select>
     </div>
     <div class="field-wrap"><label class="field-label">Added By</label><input class="field-input" id="paperAddedBy" readonly></div>
   </div>
@@ -424,11 +356,7 @@
     <div class="modal-row">
       <div class="field-wrap" style="flex:1"><label class="field-label">Date</label><input class="field-input" id="meetingDate" type="date"></div>
       <div class="field-wrap" style="flex:1"><label class="field-label">Type</label>
-        <select class="field-input" id="meetingType">
-          <option value="online">Online</option>
-          <option value="inperson">In Person</option>
-          <option value="supervisor">With Supervisor</option>
-        </select>
+        <select class="field-input" id="meetingType"><option value="online">Online</option><option value="inperson">In Person</option><option value="supervisor">With Supervisor</option></select>
       </div>
     </div>
     <div class="field-wrap"><label class="field-label">Agenda / Notes</label><textarea class="field-input field-textarea" id="meetingNotes" rows="5" placeholder="What was discussed?"></textarea></div>
