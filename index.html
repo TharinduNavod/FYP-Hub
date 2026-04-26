@@ -33,8 +33,8 @@
             onkeydown="if(event.key==='Enter') doLogin()" autocomplete="email">
         </div>
         <div class="login-error" id="loginError"></div>
-        <button class="btn-primary" onclick="doLogin()">
-          <span>Sign In</span>
+        <button class="btn-primary" id="loginBtn" onclick="doLogin()" disabled>
+         <span>Loading...</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="login-hint">Not registered? Ask your group admin to add you.</div>
@@ -93,7 +93,7 @@
         Timeline
       </button>
       <button class="nav-btn" data-section="research" onclick="showSection('research',this)">
-        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
         Research
       </button>
       <button class="nav-btn" data-section="meetings" onclick="showSection('meetings',this)">
@@ -240,14 +240,56 @@
 
     <!-- RESEARCH -->
     <section id="sec-research" class="section">
-      <div class="section-toolbar">
-        <div class="filter-tabs">
-          <button class="filter-tab active" onclick="filterResearch('all',this)">All</button>
-          <button class="filter-tab" onclick="filterResearch('unread',this)">Unread</button>
-          <button class="filter-tab" onclick="filterResearch('read',this)">Read</button>
-        </div>
+      <div class="research-tabs-wrap">
+        <button class="research-tab active" data-tab="papers" onclick="switchResearchTab('papers',this)">
+          <span class="rtab-icon">📄</span> Research Papers
+        </button>
+        <button class="research-tab" data-tab="videos" onclick="switchResearchTab('videos',this)">
+          <span class="rtab-icon">▶️</span> YouTube Videos
+        </button>
+        <button class="research-tab" data-tab="websites" onclick="switchResearchTab('websites',this)">
+          <span class="rtab-icon">🌐</span> Websites
+        </button>
       </div>
-      <div class="papers-grid" id="papersGrid"></div>
+
+      <!-- Papers sub-tab -->
+      <div id="rtab-papers" class="research-tab-content active">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterResearch('all',this)">All</button>
+            <button class="filter-tab" onclick="filterResearch('unread',this)">Unread</button>
+            <button class="filter-tab" onclick="filterResearch('reading',this)">Reading</button>
+            <button class="filter-tab" onclick="filterResearch('read',this)">Read</button>
+          </div>
+        </div>
+        <div class="papers-grid" id="papersGrid"></div>
+      </div>
+
+      <!-- Videos sub-tab -->
+      <div id="rtab-videos" class="research-tab-content">
+        <div class="research-add-bar">
+          <input class="field-input" id="videoUrl" placeholder="Paste YouTube URL here…" style="flex:1">
+          <input class="field-input" id="videoTitle" placeholder="Title (optional)" style="flex:1">
+          <button class="btn-topbar-add" onclick="addVideo()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Add Video
+          </button>
+        </div>
+        <div class="videos-grid" id="videosGrid"></div>
+      </div>
+
+      <!-- Websites sub-tab -->
+      <div id="rtab-websites" class="research-tab-content">
+        <div class="research-add-bar">
+          <input class="field-input" id="websiteUrl" placeholder="https://..." style="flex:1">
+          <input class="field-input" id="websiteTitle" placeholder="Title / Description" style="flex:1">
+          <button class="btn-topbar-add" onclick="addWebsite()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Add Site
+          </button>
+        </div>
+        <div class="websites-list" id="websitesList"></div>
+      </div>
     </section>
 
     <!-- MEETINGS -->
@@ -277,6 +319,7 @@
       <div id="uploadProgressBar" style="display:none;padding:10px 0;color:var(--accent);font-size:13px;text-align:center;"></div>
       <div class="files-grid" id="filesGrid"></div>
     </section>
+
   </main>
 </div>
 

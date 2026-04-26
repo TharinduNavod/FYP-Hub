@@ -8,6 +8,7 @@ let state = {
   meetings: [],
   chat: [],
   files: [],
+  research: [],
   projectInfo: { title: '', desc: '', supervisor: '', batch: '', deadline: '' }
 };
 
@@ -48,22 +49,53 @@ async function save() {
 // ===== LOAD FROM JSONBIN =====
 async function load() {
   try {
-    const res  = await fetch(BIN_URL + '/latest', {
+    const res = await fetch(BIN_URL + '/latest', {
       headers: { 'X-Master-Key': API_KEY }
     });
     const json = await res.json();
-
     if (json.record) state = json.record;
-
-    isLoaded = true; // 🔥 important
-
+    // ensure new arrays exist for older bins
+    if (!state.videos)   state.videos   = [];
+    if (!state.websites) state.websites = [];
+    if (!state.research) state.research = [];
   } catch (err) {
     console.error('Load failed:', err);
+  } finally {
     isLoaded = true;
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').textContent = 'Sign In';
+    checkAuth();
+  }
+}
+function doLogin() {
+  const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
+  const err = document.getElementById('loginError');
+  err.textContent = '';
+
+  if (!isLoaded) {
+    err.textContent = 'Please wait. Members are still loading...';
+    return;
   }
 
+  if (!email) {
+    err.textContent = 'Please enter your email.';
+    return;
+  }
+
+  const m = state.members.find(m => m.email.trim().toLowerCase() === email);
+
+  if (!m) {
+    err.textContent = 'Email not found. Contact your admin.';
+    return;
+  }
+
+  currentUser = m;
+  sessionStorage.setItem('fypUser', m.email);
+  bootApp();
+}
+
   checkAuth(); // ✅ check auth first — renderAll only called after login
-}// ===== FILES (name/size stored in JSONBin — actual file hosting not supported) =====
+// ===== FILES (name/size stored in JSONBin — actual file hosting not supported) =====
 function handleFileSelect(event) {
   const files = Array.from(event.target.files);
   uploadFilesToStorage(files);
@@ -225,7 +257,7 @@ function selectColor(containerId, color, el) {
 function checkAuth() {
   const email = sessionStorage.getItem('fypUser');
   if (email) {
-    const m = state.members.find(m=>m.email===email);
+    const m = state.members.find(m => m.email.trim().toLowerCase() === email.trim().toLowerCase());
     if (m) { currentUser=m; bootApp(); return; }
   }
   showLoginScreen();
@@ -252,7 +284,7 @@ function doLogin() {
   err.textContent = '';
   if (!email) { err.textContent='Please enter your email.'; return; }
   if (!state.members.length) { err.textContent='No members yet. Use setup mode first.'; return; }
-  const m = state.members.find(m=>m.email.toLowerCase()===email);
+  const m = state.members.find(m => m.email.trim().toLowerCase() === email.trim().toLowerCase());
   if (!m) { err.textContent='✕ Email not found. Contact your admin.'; return; }
   currentUser = m;
   sessionStorage.setItem('fypUser', m.email);
@@ -361,7 +393,7 @@ function topAddAction() {
     dashboard: editProject,
     tasks:     ()=>openTaskModal(),
     timeline:  ()=>openMilestoneModal(),
-    research:  ()=>openPaperModal(),
+    research:  ()=>{ if(currentResearchTab==='papers') openPaperModal(); else if(currentResearchTab==='videos') document.getElementById('videoUrl').focus(); else document.getElementById('websiteUrl').focus(); },
     meetings:  ()=>openMeetingModal(),
     chat:      ()=>document.getElementById('chatInput').focus(),
     files:     ()=>document.getElementById('filePickerInput').click()
@@ -589,15 +621,38 @@ function deleteMilestone() {
   save(); closeAllModals(); renderTimeline(); renderDashboard();
 }
 
-// ===== RESEARCH =====
-let paperFilter='all';
+// ===== RESEARCH (Papers + Videos + Websites) =====
+let paperFilter = 'all';
+let currentResearchTab = 'papers';
+
+function switchResearchTab(tab, btn) {
+  currentResearchTab = tab;
+  document.querySelectorAll('.research-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.research-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rtab-' + tab).classList.add('active');
+
+  // Update top-bar add button label
+  const labels = { papers: 'Add Paper', videos: 'Add Video', websites: 'Add Site' };
+  document.getElementById('topAddLabel').textContent = labels[tab] || 'Add';
+}
 
 function renderResearch() {
-  let papers=state.papers;
-  if (paperFilter!=='all') papers=papers.filter(p=>p.status===paperFilter);
-  const grid=document.getElementById('papersGrid');
-  if (!papers.length) { grid.innerHTML='<div style="color:var(--text3);text-align:center;padding:60px;grid-column:1/-1">No papers yet. Click "+ Add Paper" to start collecting research.</div>'; return; }
-  grid.innerHTML=papers.map(p=>`
+  renderPapers();
+  renderVideos();
+  renderWebsites();
+}
+
+// ---- PAPERS ----
+function renderPapers() {
+  let papers = state.papers;
+  if (paperFilter !== 'all') papers = papers.filter(p => p.status === paperFilter);
+  const grid = document.getElementById('papersGrid');
+  if (!papers.length) {
+    grid.innerHTML = '<div style="color:var(--text3);text-align:center;padding:60px;grid-column:1/-1">No papers yet. Click "+ Add Paper" to start collecting research.</div>';
+    return;
+  }
+  grid.innerHTML = papers.map(p => `
     <div class="paper-card" onclick="openPaperModal('${p.id}')">
       <div class="paper-status-row">
         <div class="paper-status ${p.status}">${p.status==='unread'?'Unread':p.status==='reading'?'Reading':'Read'}</div>
@@ -615,43 +670,146 @@ function renderResearch() {
   `).join('');
 }
 
-function getAddedByName(id){ const m=state.members.find(m=>m.id===id); return m?'Added by '+m.name:''; }
+function getAddedByName(id) { const m = state.members.find(m => m.id === id); return m ? 'Added by ' + m.name : ''; }
 
-function filterResearch(status,btn) {
-  paperFilter=status;
-  document.querySelectorAll('#sec-research .filter-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); renderResearch();
+function filterResearch(status, btn) {
+  paperFilter = status;
+  document.querySelectorAll('#rtab-papers .filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPapers();
 }
 
 function openPaperModal(id) {
-  editingId=id||null;
-  const p=id?state.papers.find(x=>x.id===id):null;
-  document.getElementById('paperModalTitle').textContent=p?'Edit Paper':'Add Research Paper';
-  document.getElementById('paperTitle').value   = p?p.title      :'';
-  document.getElementById('paperAuthors').value = p?p.authors||'' :'';
-  document.getElementById('paperYear').value    = p?p.year  ||''  :'';
-  document.getElementById('paperSource').value  = p?p.source||''  :'';
-  document.getElementById('paperUrl').value     = p?p.url   ||''  :'';
-  document.getElementById('paperNotes').value   = p?p.notes ||''  :'';
-  document.getElementById('paperStatus').value  = p?p.status      :'unread';
-  document.getElementById('paperAddedBy').value = p?getAddedByName(p.addedBy):currentUser.name;
-  document.getElementById('paperDeleteBtn').style.display=p?'block':'none';
+  editingId = id || null;
+  const p = id ? state.papers.find(x => x.id === id) : null;
+  document.getElementById('paperModalTitle').textContent = p ? 'Edit Paper' : 'Add Research Paper';
+  document.getElementById('paperTitle').value   = p ? p.title       : '';
+  document.getElementById('paperAuthors').value = p ? p.authors||'' : '';
+  document.getElementById('paperYear').value    = p ? p.year  ||''  : '';
+  document.getElementById('paperSource').value  = p ? p.source||''  : '';
+  document.getElementById('paperUrl').value     = p ? p.url   ||''  : '';
+  document.getElementById('paperNotes').value   = p ? p.notes ||''  : '';
+  document.getElementById('paperStatus').value  = p ? p.status      : 'unread';
+  document.getElementById('paperAddedBy').value = p ? getAddedByName(p.addedBy) : currentUser.name;
+  document.getElementById('paperDeleteBtn').style.display = p ? 'block' : 'none';
   openModal('paperModal');
 }
 
 function savePaper() {
-  const title=document.getElementById('paperTitle').value.trim();
+  const title = document.getElementById('paperTitle').value.trim();
   if (!title) return;
-  const data={title,authors:document.getElementById('paperAuthors').value.trim(),year:document.getElementById('paperYear').value,source:document.getElementById('paperSource').value.trim(),url:document.getElementById('paperUrl').value.trim(),notes:document.getElementById('paperNotes').value.trim(),status:document.getElementById('paperStatus').value};
-  if (editingId) { const idx=state.papers.findIndex(p=>p.id===editingId); if(idx>-1) state.papers[idx]={...state.papers[idx],...data}; }
-  else state.papers.push({id:uid(),addedBy:currentUser.id,addedAt:new Date().toISOString(),...data});
-  save(); closeAllModals(); renderResearch(); renderDashboard();
+  const data = {
+    title, authors: document.getElementById('paperAuthors').value.trim(),
+    year: document.getElementById('paperYear').value,
+    source: document.getElementById('paperSource').value.trim(),
+    url: document.getElementById('paperUrl').value.trim(),
+    notes: document.getElementById('paperNotes').value.trim(),
+    status: document.getElementById('paperStatus').value
+  };
+  if (editingId) { const idx = state.papers.findIndex(p => p.id === editingId); if (idx > -1) state.papers[idx] = {...state.papers[idx], ...data}; }
+  else state.papers.push({id: uid(), addedBy: currentUser.id, addedAt: new Date().toISOString(), ...data});
+  save(); closeAllModals(); renderPapers(); renderDashboard();
 }
 
 function deletePaper() {
-  if (!editingId||!confirm('Delete this paper?')) return;
-  state.papers=state.papers.filter(p=>p.id!==editingId);
-  save(); closeAllModals(); renderResearch(); renderDashboard();
+  if (!editingId || !confirm('Delete this paper?')) return;
+  state.papers = state.papers.filter(p => p.id !== editingId);
+  save(); closeAllModals(); renderPapers(); renderDashboard();
+}
+
+// ---- VIDEOS ----
+function getYtId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function addVideo() {
+  const url   = document.getElementById('videoUrl').value.trim();
+  const title = document.getElementById('videoTitle').value.trim();
+  if (!url) { alert('Please enter a YouTube URL.'); return; }
+  const ytId = getYtId(url);
+  if (!ytId) { alert('Could not parse YouTube URL. Please check and try again.'); return; }
+  if (!state.videos) state.videos = [];
+  state.videos.push({ id: uid(), url, ytId, title: title || url, addedBy: currentUser.id, addedAt: new Date().toISOString() });
+  document.getElementById('videoUrl').value = '';
+  document.getElementById('videoTitle').value = '';
+  save(); renderVideos();
+}
+
+function renderVideos() {
+  if (!state.videos) state.videos = [];
+  const grid = document.getElementById('videosGrid');
+  if (!grid) return;
+  if (!state.videos.length) {
+    grid.innerHTML = '<div style="color:var(--text3);text-align:center;padding:60px;grid-column:1/-1">No videos yet. Paste a YouTube URL above to add one.</div>';
+    return;
+  }
+  grid.innerHTML = state.videos.map(v => `
+    <div class="video-card">
+      <a href="${v.url}" target="_blank" rel="noopener" class="video-thumb-wrap">
+        <img class="video-thumb" src="https://img.youtube.com/vi/${v.ytId}/mqdefault.jpg" alt="${v.title}" loading="lazy">
+        <div class="video-play-btn">▶</div>
+      </a>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">${getAddedByName(v.addedBy)}</div>
+      </div>
+      <button class="video-delete" onclick="deleteVideo('${v.id}')" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteVideo(id) {
+  if (!confirm('Remove this video?')) return;
+  state.videos = (state.videos || []).filter(v => v.id !== id);
+  save(); renderVideos();
+}
+
+// ---- WEBSITES ----
+function addWebsite() {
+  const url   = document.getElementById('websiteUrl').value.trim();
+  const title = document.getElementById('websiteTitle').value.trim();
+  if (!url) { alert('Please enter a URL.'); return; }
+  if (!state.websites) state.websites = [];
+  const domain = (() => { try { return new URL(url).hostname; } catch { return url; } })();
+  state.websites.push({ id: uid(), url, title: title || domain, domain, addedBy: currentUser.id, addedAt: new Date().toISOString() });
+  document.getElementById('websiteUrl').value = '';
+  document.getElementById('websiteTitle').value = '';
+  save(); renderWebsites();
+}
+
+function renderWebsites() {
+  if (!state.websites) state.websites = [];
+  const list = document.getElementById('websitesList');
+  if (!list) return;
+  if (!state.websites.length) {
+    list.innerHTML = '<div style="color:var(--text3);text-align:center;padding:60px">No websites yet. Add a URL above.</div>';
+    return;
+  }
+  list.innerHTML = state.websites.map(w => `
+    <div class="website-item">
+      <img class="website-favicon" src="https://www.google.com/s2/favicons?sz=32&domain=${w.domain}" alt="" onerror="this.style.display='none'">
+      <div class="website-info">
+        <div class="website-title">${w.title}</div>
+        <div class="website-domain">${w.domain}</div>
+      </div>
+      <a class="website-open" href="${w.url}" target="_blank" rel="noopener">Open ↗</a>
+      <button class="website-delete" onclick="deleteWebsite('${w.id}')" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteWebsite(id) {
+  if (!confirm('Remove this website?')) return;
+  state.websites = (state.websites || []).filter(w => w.id !== id);
+  save(); renderWebsites();
+}
+
+// Legacy addResearch kept for compatibility
+function addResearch() {
+  if (currentResearchTab === 'papers') openPaperModal();
+  else if (currentResearchTab === 'videos') document.getElementById('videoUrl').focus();
+  else document.getElementById('websiteUrl').focus();
 }
 
 // ===== MEETINGS =====
@@ -896,4 +1054,42 @@ function closeAllModals() {
     setTimeout(()=>{ if(!m.classList.contains('show')) m.style.display='none'; },200);
   });
   editingId=null;
+}
+
+function addResearch() {
+  const type = document.getElementById('resType').value;
+  const title = document.getElementById('resTitle').value;
+  const url = document.getElementById('resUrl').value;
+  
+  if (!title || !url) {
+    alert('Please fill all fields');
+    return;
+  }
+  
+  state.research.push({ id: uid(), type, title, url });
+  save();
+  renderResearch();
+  // Clear fields
+  document.getElementById('resTitle').value = '';
+  document.getElementById('resUrl').value = '';
+}
+
+function renderResearch() {
+  const list = document.getElementById('researchList');
+  list.innerHTML = state.research.map(r => `
+    <div class="upload-list-item">
+      <div class="upload-list-info">
+        <div style="font-weight:600">${r.title}</div>
+        <div style="font-size:12px; color:var(--text2)">${r.type}</div>
+      </div>
+      <a href="${r.url}" target="_blank" class="btn-ghost" style="padding:4px 8px; font-size:11px">Open</a>
+      <button class="btn-modal-delete" onclick="deleteResearch('${r.id}')" style="margin-left:5px">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteResearch(id) {
+  state.research = state.research.filter(r => r.id !== id);
+  save();
+  renderResearch();
 }
