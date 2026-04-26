@@ -48,6 +48,15 @@ async function save() {
 
 // ===== LOAD FROM JSONBIN =====
 async function load() {
+  const btn = document.getElementById('loginBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  // Safety fallback: if fetch hangs > 8s, enable button anyway
+  const fallback = setTimeout(() => {
+    isLoaded = true;
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+  }, 8000);
+
   try {
     const res = await fetch(BIN_URL + '/latest', {
       headers: { 'X-Master-Key': API_KEY }
@@ -61,9 +70,9 @@ async function load() {
   } catch (err) {
     console.error('Load failed:', err);
   } finally {
+    clearTimeout(fallback);
     isLoaded = true;
-    document.getElementById('loginBtn').disabled = false;
-    document.getElementById('loginBtn').textContent = 'Sign In';
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
     checkAuth();
   }
 }
