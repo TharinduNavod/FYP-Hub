@@ -1065,40 +1065,4 @@ function closeAllModals() {
   editingId=null;
 }
 
-function addResearch() {
-  const type = document.getElementById('resType').value;
-  const title = document.getElementById('resTitle').value;
-  const url = document.getElementById('resUrl').value;
-  
-  if (!title || !url) {
-    alert('Please fill all fields');
-    return;
-  }
-  
-  state.research.push({ id: uid(), type, title, url });
-  save();
-  renderResearch();
-  // Clear fields
-  document.getElementById('resTitle').value = '';
-  document.getElementById('resUrl').value = '';
-}
-
-function renderResearch() {
-  const list = document.getElementById('researchList');
-  list.innerHTML = state.research.map(r => `
-    <div class="upload-list-item">
-      <div class="upload-list-info">
-        <div style="font-weight:600">${r.title}</div>
-        <div style="font-size:12px; color:var(--text2)">${r.type}</div>
-      </div>
-      <a href="${r.url}" target="_blank" class="btn-ghost" style="padding:4px 8px; font-size:11px">Open</a>
-      <button class="btn-modal-delete" onclick="deleteResearch('${r.id}')" style="margin-left:5px">✕</button>
-    </div>
-  `).join('');
-}
-
-function deleteResearch(id) {
-  state.research = state.research.filter(r => r.id !== id);
-  save();
-  renderResearch();
-}
+// Note: addResearch, renderResearch, deleteResearch are defined above near the research section
