@@ -76,34 +76,7 @@ async function load() {
     checkAuth();
   }
 }
-function doLogin() {
-  const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-  const err = document.getElementById('loginError');
-  err.textContent = '';
-
-  if (!isLoaded) {
-    err.textContent = 'Please wait. Members are still loading...';
-    return;
-  }
-
-  if (!email) {
-    err.textContent = 'Please enter your email.';
-    return;
-  }
-
-  const m = state.members.find(m => m.email.trim().toLowerCase() === email);
-
-  if (!m) {
-    err.textContent = 'Email not found. Contact your admin.';
-    return;
-  }
-
-  currentUser = m;
-  sessionStorage.setItem('fypUser', m.email);
-  bootApp();
-}
-
-  checkAuth(); // ✅ check auth first — renderAll only called after login
+  // checkAuth() is called inside load() after data is fetched — do not call it here
 // ===== FILES (name/size stored in JSONBin — actual file hosting not supported) =====
 function handleFileSelect(event) {
   const files = Array.from(event.target.files);
@@ -290,11 +263,31 @@ function showSetupView() {
 function doLogin() {
   const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
   const err   = document.getElementById('loginError');
+  const btn   = document.getElementById('loginBtn');
   err.textContent = '';
-  if (!email) { err.textContent='Please enter your email.'; return; }
-  if (!state.members.length) { err.textContent='No members yet. Use setup mode first.'; return; }
+
+  if (!email) { err.textContent = 'Please enter your email.'; return; }
+
+  // If JSONBin still loading, wait and auto-retry
+  if (!isLoaded) {
+    err.textContent = 'Still loading data, please wait...';
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Loading...';
+    const poll = setInterval(() => {
+      if (isLoaded) {
+        clearInterval(poll);
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Sign In';
+        err.textContent = '';
+        doLogin(); // auto-retry once loaded
+      }
+    }, 200);
+    return;
+  }
+
+  if (!state.members.length) { err.textContent = 'No members yet. Use setup mode first.'; return; }
   const m = state.members.find(m => m.email.trim().toLowerCase() === email.trim().toLowerCase());
-  if (!m) { err.textContent='✕ Email not found. Contact your admin.'; return; }
+  if (!m) { err.textContent = '✕ Email not found. Contact your admin.'; return; }
   currentUser = m;
   sessionStorage.setItem('fypUser', m.email);
   bootApp();
