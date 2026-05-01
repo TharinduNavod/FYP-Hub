@@ -166,11 +166,79 @@ function deleteFile(id) {
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 // ===== INIT =====
+// ===== GOOGLE OAUTH CONFIG =====
+const GOOGLE_CLIENT_ID = '875435100556-7ht71b4ml7grg78sim00jq7oihbdhfr7.apps.googleusercontent.com';
+
 window.onload = () => {
   initColorSwatches();
   drawLoginCanvas();
+  initGoogleSignIn();
   load(); // load() calls checkAuth() after data fetched
 };
+
+function initGoogleSignIn() {
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+}
+
+function triggerGoogleSignIn() {
+  if (!isLoaded) {
+    const err = document.getElementById('loginError');
+    err.textContent = 'Still loading data, please wait...';
+    const poll = setInterval(() => {
+      if (isLoaded) {
+        clearInterval(poll);
+        err.textContent = '';
+        triggerGoogleSignIn();
+      }
+    }, 200);
+    return;
+  }
+  google.accounts.id.prompt((notification) => {
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      // fallback: show popup
+      google.accounts.id.renderButton(
+        document.getElementById('googleBtnInner'),
+        { theme: 'outline', size: 'large', width: 280 }
+      );
+    }
+  });
+}
+
+function handleGoogleCredential(response) {
+  const payload = parseJwt(response.credential);
+  const email = payload.email.trim().toLowerCase();
+  const name  = payload.name;
+  const picture = payload.picture;
+
+  const err = document.getElementById('loginError');
+  err.textContent = '';
+
+  const m = state.members.find(m => m.email.trim().toLowerCase() === email);
+  if (!m) {
+    err.textContent = `✕ ${email} is not registered. Ask your admin to add you.`;
+    return;
+  }
+
+  // Update member picture if available
+  if (picture && !m.picture) {
+    m.picture = picture;
+    save();
+  }
+
+  currentUser = m;
+  sessionStorage.setItem('fypUser', m.email);
+  bootApp();
+}
+
+function parseJwt(token) {
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(atob(base64));
+}
 
 // ===== LOGIN CANVAS ANIMATION =====
 function drawLoginCanvas() {
@@ -260,38 +328,7 @@ function showSetupView() {
   document.getElementById('loginView').style.display='none';
 }
 
-function doLogin() {
-  const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-  const err   = document.getElementById('loginError');
-  const btn   = document.getElementById('loginBtn');
-  err.textContent = '';
-
-  if (!email) { err.textContent = 'Please enter your email.'; return; }
-
-  // If JSONBin still loading, wait and auto-retry
-  if (!isLoaded) {
-    err.textContent = 'Still loading data, please wait...';
-    btn.disabled = true;
-    btn.querySelector('span').textContent = 'Loading...';
-    const poll = setInterval(() => {
-      if (isLoaded) {
-        clearInterval(poll);
-        btn.disabled = false;
-        btn.querySelector('span').textContent = 'Sign In';
-        err.textContent = '';
-        doLogin(); // auto-retry once loaded
-      }
-    }, 200);
-    return;
-  }
-
-  if (!state.members.length) { err.textContent = 'No members yet. Use setup mode first.'; return; }
-  const m = state.members.find(m => m.email.trim().toLowerCase() === email.trim().toLowerCase());
-  if (!m) { err.textContent = '✕ Email not found. Contact your admin.'; return; }
-  currentUser = m;
-  sessionStorage.setItem('fypUser', m.email);
-  bootApp();
-}
+// doLogin replaced by Google OAuth — see handleGoogleCredential()
 
 function doSetupSave() {
   const name  = document.getElementById('setupName').value.trim();
@@ -310,10 +347,11 @@ function doSetupSave() {
 
 function doLogout() {
   sessionStorage.removeItem('fypUser');
+  // Sign out from Google so next visit shows picker again
+  google.accounts.id.disableAutoSelect();
   currentUser = null;
   document.getElementById('appRoot').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('loginEmailInput').value='';
   document.getElementById('loginError').textContent='';
 }
 
